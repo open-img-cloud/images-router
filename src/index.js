@@ -84,6 +84,12 @@ export default {
     const headers = new Headers();
     obj.writeHttpMetadata(headers);
     headers.set("etag", obj.httpEtag);
+    // R2's writeHttpMetadata doesn't include Content-Length; surface it
+    // explicitly from the R2 object's `size` so browsers/CLI clients can
+    // render download progress and so HEAD responses are useful.
+    if (typeof obj.size === "number") {
+      headers.set("content-length", obj.size.toString());
+    }
 
     // Cache-Control: latest/ is short-lived, everything else is immutable.
     if (
