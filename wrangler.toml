@@ -1,0 +1,58 @@
+name = "images-router"
+main = "src/index.js"
+compatibility_date = "2026-05-09"
+
+# Route all traffic on the public hostname through this Worker.
+# The hostname's DNS record (an "AAAA orange-cloud" / proxied A) lives in the
+# openimages.cloud zone.
+routes = [
+  { pattern = "images.openimages.cloud/*", zone_name = "openimages.cloud" },
+]
+
+# Allowlist of bucket names the Worker is willing to route to. Add a new
+# entry here AND a matching [[r2_buckets]] binding below for every new
+# image repo onboarded under open-img-cloud/.
+[vars]
+ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,windows-server-2022,octavia-amphora,cloud-rescue"
+
+# R2 bindings — one per distribution bucket. Binding name follows the
+# convention: uppercase(<os_name>) with - replaced by _.
+# Example: alpaquita-linux → ALPAQUITA_LINUX.
+[[r2_buckets]]
+binding = "ALPAQUITA_LINUX"
+bucket_name = "alpaquita-linux"
+
+# Uncomment the blocks below as the corresponding R2 buckets are created:
+
+# [[r2_buckets]]
+# binding = "ALPINE_LINUX"
+# bucket_name = "alpine-linux"
+
+# [[r2_buckets]]
+# binding = "AMAZON_LINUX_2"
+# bucket_name = "amazon-linux-2"
+
+# [[r2_buckets]]
+# binding = "AMAZON_LINUX_2023"
+# bucket_name = "amazon-linux-2023"
+
+# [[r2_buckets]]
+# binding = "GENTOO_LINUX"
+# bucket_name = "gentoo-linux"
+
+# [[r2_buckets]]
+# binding = "WINDOWS_SERVER_2022"
+# bucket_name = "windows-server-2022"
+
+# [[r2_buckets]]
+# binding = "OCTAVIA_AMPHORA"
+# bucket_name = "octavia-amphora"
+
+# [[r2_buckets]]
+# binding = "CLOUD_RESCUE"
+# bucket_name = "cloud-rescue"
+
+# Observability — keep request logs for debugging path/cache issues.
+[observability]
+enabled = true
+head_sampling_rate = 1.0

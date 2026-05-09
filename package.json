@@ -1,0 +1,16 @@
+{
+  "name": "images-router",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that routes images.openimages.cloud/<os>/* to per-distribution R2 buckets.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.34.0"
+  }
+}
