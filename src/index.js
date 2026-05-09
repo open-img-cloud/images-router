@@ -30,6 +30,10 @@ export default {
     }
 
     const url = new URL(request.url);
+    // Preserve the trailing-slash signal BEFORE filtering empty segments —
+    // `/foo/bar/`.split('/').filter(Boolean) === ['foo', 'bar'] drops the
+    // trailing slash, so we'd never serve index.html for directory requests.
+    const isDirRequest = url.pathname === "/" || url.pathname.endsWith("/");
     const segments = url.pathname.split("/").filter(Boolean);
 
     // Root → static landing (or 404 — keep simple for now).
@@ -64,10 +68,12 @@ export default {
       });
     }
 
-    // Empty key or trailing-slash → serve index.html for the directory.
+    // Bucket-root or directory-style request → serve index.html.
+    // - "/<bucket>/"          (keyTail empty + isDirRequest) → "index.html"
+    // - "/<bucket>/<ver>/"    (keyTail="<ver>" + isDirRequest) → "<ver>/index.html"
     let key = keyTail;
-    if (!key || key.endsWith("/")) {
-      key = (key + "index.html").replace(/^\//, "");
+    if (isDirRequest) {
+      key = key ? `${key}/index.html` : "index.html";
     }
 
     const obj = request.method === "HEAD" ? await bucket.head(key) : await bucket.get(key);
