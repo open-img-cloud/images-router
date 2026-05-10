@@ -32,9 +32,9 @@ bucket_name = "alpine-linux"
 # binding = "AMAZON_LINUX_2"
 # bucket_name = "amazon-linux-2"
 
-# [[r2_buckets]]
-# binding = "AMAZON_LINUX_2023"
-# bucket_name = "amazon-linux-2023"
+[[r2_buckets]]
+binding = "AMAZON_LINUX_2023"
+bucket_name = "amazon-linux-2023"
 
 # [[r2_buckets]]
 # binding = "GENTOO_LINUX"
