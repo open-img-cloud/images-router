@@ -63,9 +63,9 @@ bucket_name = "octavia-amphora"
 # binding = "CLOUD_RESCUE"
 # bucket_name = "cloud-rescue"
 
-# [[r2_buckets]]
-# binding = "NIXOS"
-# bucket_name = "nixos"
+[[r2_buckets]]
+binding = "NIXOS"
+bucket_name = "nixos"
 
 # Observability — keep request logs for debugging path/cache issues.
 [observability]
