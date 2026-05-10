@@ -41,11 +41,11 @@ bucket_name = "amazon-linux-2023"
 # bucket_name = "gentoo-linux"
 
 # Oracle Linux: separate repos per major (OL9 + OL10 supported in
-# parallel under Oracle's lifecycle). Buckets to be created when each
-# repo is first published; uncomment as they go live.
-# [[r2_buckets]]
-# binding = "ORACLE_LINUX_9"
-# bucket_name = "oracle-linux-9"
+# parallel under Oracle's lifecycle). Buckets are provisioned per
+# repo and uncommented as they go live.
+[[r2_buckets]]
+binding = "ORACLE_LINUX_9"
+bucket_name = "oracle-linux-9"
 
 # [[r2_buckets]]
 # binding = "ORACLE_LINUX_10"
