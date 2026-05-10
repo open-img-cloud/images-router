@@ -47,9 +47,9 @@ bucket_name = "amazon-linux-2023"
 binding = "ORACLE_LINUX_9"
 bucket_name = "oracle-linux-9"
 
-# [[r2_buckets]]
-# binding = "ORACLE_LINUX_10"
-# bucket_name = "oracle-linux-10"
+[[r2_buckets]]
+binding = "ORACLE_LINUX_10"
+bucket_name = "oracle-linux-10"
 
 # [[r2_buckets]]
 # binding = "WINDOWS_SERVER_2022"
