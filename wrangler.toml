@@ -13,7 +13,7 @@ routes = [
 # entry here AND a matching [[r2_buckets]] binding below for every new
 # image repo onboarded under open-img-cloud/.
 [vars]
-ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,oracle-linux-9,oracle-linux-10,windows-server-2022,octavia-amphora,cloud-rescue"
+ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,nixos,oracle-linux-9,oracle-linux-10,windows-server-2022,octavia-amphora,cloud-rescue"
 
 # R2 bindings — one per distribution bucket. Binding name follows the
 # convention: uppercase(<os_name>) with - replaced by _.
@@ -62,6 +62,10 @@ bucket_name = "octavia-amphora"
 # [[r2_buckets]]
 # binding = "CLOUD_RESCUE"
 # bucket_name = "cloud-rescue"
+
+# [[r2_buckets]]
+# binding = "NIXOS"
+# bucket_name = "nixos"
 
 # Observability — keep request logs for debugging path/cache issues.
 [observability]
