@@ -13,7 +13,7 @@ routes = [
 # entry here AND a matching [[r2_buckets]] binding below for every new
 # image repo onboarded under open-img-cloud/.
 [vars]
-ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,windows-server-2022,octavia-amphora,cloud-rescue"
+ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,oracle-linux-9,oracle-linux-10,windows-server-2022,octavia-amphora,cloud-rescue"
 
 # R2 bindings — one per distribution bucket. Binding name follows the
 # convention: uppercase(<os_name>) with - replaced by _.
@@ -39,6 +39,17 @@ bucket_name = "amazon-linux-2023"
 # [[r2_buckets]]
 # binding = "GENTOO_LINUX"
 # bucket_name = "gentoo-linux"
+
+# Oracle Linux: separate repos per major (OL9 + OL10 supported in
+# parallel under Oracle's lifecycle). Buckets to be created when each
+# repo is first published; uncomment as they go live.
+# [[r2_buckets]]
+# binding = "ORACLE_LINUX_9"
+# bucket_name = "oracle-linux-9"
+
+# [[r2_buckets]]
+# binding = "ORACLE_LINUX_10"
+# bucket_name = "oracle-linux-10"
 
 # [[r2_buckets]]
 # binding = "WINDOWS_SERVER_2022"
