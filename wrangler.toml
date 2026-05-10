@@ -55,9 +55,9 @@ bucket_name = "oracle-linux-10"
 # binding = "WINDOWS_SERVER_2022"
 # bucket_name = "windows-server-2022"
 
-# [[r2_buckets]]
-# binding = "OCTAVIA_AMPHORA"
-# bucket_name = "octavia-amphora"
+[[r2_buckets]]
+binding = "OCTAVIA_AMPHORA"
+bucket_name = "octavia-amphora"
 
 # [[r2_buckets]]
 # binding = "CLOUD_RESCUE"
