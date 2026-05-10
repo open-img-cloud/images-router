@@ -24,9 +24,9 @@ bucket_name = "alpaquita-linux"
 
 # Uncomment the blocks below as the corresponding R2 buckets are created:
 
-# [[r2_buckets]]
-# binding = "ALPINE_LINUX"
-# bucket_name = "alpine-linux"
+[[r2_buckets]]
+binding = "ALPINE_LINUX"
+bucket_name = "alpine-linux"
 
 # [[r2_buckets]]
 # binding = "AMAZON_LINUX_2"
