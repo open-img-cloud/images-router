@@ -47,6 +47,30 @@ GET https://s3.gva2.infomaniak.cloud/<tenant>:alpine-linux/3.23.4/foo.qcow2
 3. **Commit + push** to `main`. The `deploy.yml` workflow runs
    `wrangler deploy`.
 
+## Daily scheduler (Cron Trigger)
+
+GitHub disables `schedule:` triggers in public repositories after 60 days
+without repository activity, which silently stopped the upstream watchers
+in 2026. This Worker also has a Cron Trigger (`[triggers] crons` in
+`wrangler.toml`, daily 05:40 UTC) that dispatches, via `workflow_dispatch`
+(never disabled for inactivity), every workflow listed in
+`SCHEDULED_WORKFLOWS` (`repo:workflow.yml,...`, org `open-img-cloud`):
+the 8 `watch.yml` upstream watchers and the `oic-website` daily deploy.
+
+The repos keep their own `schedule:` triggers as a fallback; duplicate runs
+are harmless. Code: `src/scheduler.js`. Results are logged per workflow
+(`scheduler: <repo>/<workflow> -> 204` on success) in Workers observability.
+
+Required secret, set once:
+
+```sh
+npx wrangler secret put GH_DISPATCH_TOKEN
+```
+
+A fine-grained personal access token, resource owner `open-img-cloud`,
+restricted to the repos in `SCHEDULED_WORKFLOWS`, permission
+**Actions: Read and write** only.
+
 ## Local development
 
 ```sh

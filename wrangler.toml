@@ -21,6 +21,14 @@ ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023
 S3_ORIGIN = "https://s3.gva2.infomaniak.cloud"
 S3_TENANT = "c0862b7f7b6849508bbcd74fb00e7fe2"
 
+# Daily external scheduler (src/scheduler.js): dispatches these workflows
+# via workflow_dispatch, which GitHub never disables for inactivity.
+# Requires the GH_DISPATCH_TOKEN secret (wrangler secret put GH_DISPATCH_TOKEN).
+SCHEDULED_WORKFLOWS = "alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml"
+
+[triggers]
+crons = ["40 5 * * *"]  # daily 05:40 UTC, before the repos' own 06:17-06:59 fallbacks
+
 # Observability — keep request logs for debugging path/cache issues.
 [observability]
 enabled = true
