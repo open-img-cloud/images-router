@@ -23,6 +23,8 @@
 // open proxy to arbitrary buckets of the tenant. Add the bucket name there
 // when onboarding a new image repo.
 
+import { dispatchAll } from "./scheduler.js";
+
 const TEXT = { "content-type": "text/plain; charset=utf-8" };
 const NOT_FOUND = () => new Response("Not found", { status: 404, headers: TEXT });
 
@@ -43,6 +45,11 @@ const IMMUTABLE_TTL = 31536000;
 const LATEST_TTL = 300;
 
 export default {
+  // Daily Cron Trigger: dispatch the workflows listed in SCHEDULED_WORKFLOWS.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dispatchAll(env));
+  },
+
   async fetch(request, env) {
     if (request.method !== "GET" && request.method !== "HEAD") {
       return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD", ...TEXT } });
