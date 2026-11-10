@@ -1,43 +1,51 @@
 # images-router
 
 Cloudflare Worker that routes `https://images.openimages.cloud/<os>/...` to
-per-distribution R2 buckets. Keeps the public URL pattern stable while
-each distribution gets its own bucket (see
+per-distribution public buckets on **Infomaniak Object Storage** (Ceph S3,
+Public Cloud project `Images_Storage`). Keeps the public URL pattern stable
+while each distribution gets its own bucket (see
 [`open-img-cloud/.github` CONVENTIONS.md][conv]).
 
 ## What it does
 
 ```
-GET https://images.openimages.cloud/alpaquita-linux/2026.04.14/foo.qcow2
-                                    └─────┬─────┘ └────┬────┘ └───┬───┘
-                                       bucket       version    object key
+GET https://images.openimages.cloud/alpine-linux/3.23.4/foo.qcow2
+                                    └────┬─────┘ └─┬──┘ └───┬───┘
+                                       bucket   version  object key
                                           │
                                           ▼
-                                   R2 bucket "alpaquita-linux"
-                                   key: "2026.04.14/foo.qcow2"
+GET https://s3.gva2.infomaniak.cloud/<tenant>:alpine-linux/3.23.4/foo.qcow2
 ```
 
-- First path segment selects an R2 bucket (must be in the allowlist
-  *and* have a matching `[[r2_buckets]]` binding in `wrangler.toml`).
+- First path segment selects the bucket (must be in `ALLOWED_BUCKETS`).
 - The rest of the path is the object key.
 - Trailing-slash or empty key serves `<key>/index.html`.
-- `latest/<key>` is served with `Cache-Control: public, max-age=300`.
-  Versioned paths get `public, max-age=31536000, immutable`.
+- `latest/…` and the bucket-root index are served with
+  `Cache-Control: public, max-age=300`. Versioned paths get
+  `public, max-age=31536000, immutable`.
+- Origin 403/404 are returned as 404: without ListBucket rights, S3 answers
+  403 for a missing key on a public bucket.
+- `Range`, `If-None-Match`, `If-Modified-Since` and `If-Range` are forwarded,
+  so interrupted downloads can resume.
+- Responses are cached at the Cloudflare edge. Objects above the plan's cache
+  size limit are streamed from the origin on each request.
+
+## Configuration (`wrangler.toml` `[vars]`)
+
+| Variable | Value |
+|---|---|
+| `ALLOWED_BUCKETS` | Comma-separated bucket names |
+| `S3_ORIGIN` | `https://s3.gva2.infomaniak.cloud` |
+| `S3_TENANT` | Keystone project id of `Images_Storage` (public, appears in every object URL) |
 
 ## Onboarding a new image repo
 
-When a new `open-img-cloud/<os>` image repo is added:
-
-1. **Create the R2 bucket** on Cloudflare with the **exact same name**
-   (`<os>`).
-2. **Edit `wrangler.toml`**:
-   - Add `<os>` to the `ALLOWED_BUCKETS` comma-separated list under
-     `[vars]`.
-   - Uncomment (or add) the matching `[[r2_buckets]]` block. Binding
-     name = uppercase(`<os>`) with `-` replaced by `_`. Example:
-     `alpaquita-linux` → `ALPAQUITA_LINUX`.
+1. **Create the bucket** in the Infomaniak Public Cloud project
+   `Images_Storage`, with the **exact same name** as the repo (`<os>`),
+   region `dc4-a`, public access enabled.
+2. **Add `<os>`** to `ALLOWED_BUCKETS` in `wrangler.toml`.
 3. **Commit + push** to `main`. The `deploy.yml` workflow runs
-   `wrangler deploy` and the new bucket starts serving immediately.
+   `wrangler deploy`.
 
 ## Local development
 
@@ -47,9 +55,6 @@ npx wrangler dev
 # then: curl http://localhost:8787/alpaquita-linux/2026.04.14/foo.qcow2
 ```
 
-`wrangler dev` connects to remote R2 by default (proxies through
-Cloudflare). To dev fully offline, see the wrangler docs on
-`--remote=false` + `r2_buckets` simulators.
 
 ## Deploy
 

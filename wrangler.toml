@@ -9,63 +9,17 @@ routes = [
   { pattern = "images.openimages.cloud/*", zone_name = "openimages.cloud" },
 ]
 
-# Allowlist of bucket names the Worker is willing to route to. Add a new
-# entry here AND a matching [[r2_buckets]] binding below for every new
-# image repo onboarded under open-img-cloud/.
 [vars]
+# Allowlist of bucket names the Worker is willing to route to. Add the
+# bucket name here for every new image repo onboarded under open-img-cloud/.
 ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,nixos,oracle-linux-9,oracle-linux-10,windows-server-2022,octavia-amphora,cloud-rescue"
 
-# R2 bindings — one per distribution bucket. Binding name follows the
-# convention: uppercase(<os_name>) with - replaced by _.
-# Example: alpaquita-linux → ALPAQUITA_LINUX.
-[[r2_buckets]]
-binding = "ALPAQUITA_LINUX"
-bucket_name = "alpaquita-linux"
-
-# Uncomment the blocks below as the corresponding R2 buckets are created:
-
-[[r2_buckets]]
-binding = "ALPINE_LINUX"
-bucket_name = "alpine-linux"
-
-[[r2_buckets]]
-binding = "AMAZON_LINUX_2"
-bucket_name = "amazon-linux-2"
-
-[[r2_buckets]]
-binding = "AMAZON_LINUX_2023"
-bucket_name = "amazon-linux-2023"
-
-# [[r2_buckets]]
-# binding = "GENTOO_LINUX"
-# bucket_name = "gentoo-linux"
-
-# Oracle Linux: separate repos per major (OL9 + OL10 supported in
-# parallel under Oracle's lifecycle). Buckets are provisioned per
-# repo and uncommented as they go live.
-[[r2_buckets]]
-binding = "ORACLE_LINUX_9"
-bucket_name = "oracle-linux-9"
-
-[[r2_buckets]]
-binding = "ORACLE_LINUX_10"
-bucket_name = "oracle-linux-10"
-
-# [[r2_buckets]]
-# binding = "WINDOWS_SERVER_2022"
-# bucket_name = "windows-server-2022"
-
-[[r2_buckets]]
-binding = "OCTAVIA_AMPHORA"
-bucket_name = "octavia-amphora"
-
-# [[r2_buckets]]
-# binding = "CLOUD_RESCUE"
-# bucket_name = "cloud-rescue"
-
-[[r2_buckets]]
-binding = "NIXOS"
-bucket_name = "nixos"
+# Origin: Infomaniak Object Storage (Ceph S3), Public Cloud project
+# "Images_Storage" (PCP-LKEN9H4). Public buckets are read anonymously via
+# path-style URLs: ${S3_ORIGIN}/${S3_TENANT}:<bucket>/<key>.
+# The tenant id is not a secret: it appears in every public object URL.
+S3_ORIGIN = "https://s3.gva2.infomaniak.cloud"
+S3_TENANT = "c0862b7f7b6849508bbcd74fb00e7fe2"
 
 # Observability — keep request logs for debugging path/cache issues.
 [observability]
