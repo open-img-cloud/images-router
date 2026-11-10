@@ -2,7 +2,7 @@
   "name": "images-router",
   "version": "1.0.0",
   "private": true,
-  "description": "Cloudflare Worker that routes images.openimages.cloud/<os>/* to per-distribution R2 buckets.",
+  "description": "Cloudflare Worker that routes images.openimages.cloud/<os>/* to per-distribution buckets on Infomaniak Object Storage.",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
