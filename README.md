@@ -100,7 +100,7 @@ For the `deploy.yml` workflow to run:
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Dashboard → right-side panel → "Account ID" | n/a (just the value) |
 
 These are **repo-level secrets** (Settings → Secrets and variables →
-Actions), not org-level — scoped tightly because they have Workers
+Actions), not org-level: scoped tightly because they have Workers
 deploy power.
 
 ## Verification
