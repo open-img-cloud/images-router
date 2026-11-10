@@ -1,4 +1,4 @@
-// Cloudflare Worker — routes path-prefixed requests to per-distribution
+// Cloudflare Worker: routes path-prefixed requests to per-distribution
 // buckets on Infomaniak Object Storage (Ceph S3), preserving the public URL
 // pattern:
 //
@@ -13,7 +13,7 @@
 //
 // The first path segment selects the bucket; the remainder is the object key.
 //
-// Cache policy (set here, at the edge — origin metadata is ignored):
+// Cache policy (set here, at the edge: origin metadata is ignored):
 //   - Versioned paths (e.g. /alpine-linux/3.23.4/foo.qcow2) are immutable:
 //     `public, max-age=31536000, immutable`.
 //   - The `latest/` alias and the bucket-root index are mutable:
@@ -56,7 +56,7 @@ export default {
     }
 
     const url = new URL(request.url);
-    // Preserve the trailing-slash signal BEFORE filtering empty segments —
+    // Preserve the trailing-slash signal BEFORE filtering empty segments:
     // `/foo/bar/`.split('/').filter(Boolean) drops it, and we'd never serve
     // index.html for directory requests.
     const isDirRequest = url.pathname === "/" || url.pathname.endsWith("/");

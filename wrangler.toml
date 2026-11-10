@@ -29,7 +29,7 @@ SCHEDULED_WORKFLOWS = "alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-l
 [triggers]
 crons = ["40 5 * * *"]  # daily 05:40 UTC, before the repos' own 06:17-06:59 fallbacks
 
-# Observability — keep request logs for debugging path/cache issues.
+# Observability: keep request logs for debugging path/cache issues.
 [observability]
 enabled = true
 head_sampling_rate = 1.0
