@@ -26,8 +26,12 @@ S3_TENANT = "c0862b7f7b6849508bbcd74fb00e7fe2"
 # Requires the GH_DISPATCH_TOKEN secret (wrangler secret put GH_DISPATCH_TOKEN).
 SCHEDULED_WORKFLOWS = "almalinux-9:watch.yml,rocky-linux-9:watch.yml,alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-8:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml"
 
+# Weekly (Mondays 04:00 UTC, cron must match WEEKLY_CRON in src/scheduler.js):
+# catalog-wide re-validation of every published image.
+WEEKLY_WORKFLOWS = ".github:catalog-audit.yml"
+
 [triggers]
-crons = ["40 5 * * *"]  # daily 05:40 UTC, before the repos' own 06:17-06:59 fallbacks
+crons = ["40 5 * * *", "0 4 * * 1"]  # daily watchers 05:40 UTC; weekly audit Monday 04:00 UTC
 
 # Observability: keep request logs for debugging path/cache issues.
 [observability]

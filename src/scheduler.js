@@ -9,7 +9,8 @@
 // idempotent).
 //
 // Config (wrangler.toml):
-//   [vars] SCHEDULED_WORKFLOWS = "repo:workflow.yml,..."  (org: open-img-cloud)
+//   [vars] SCHEDULED_WORKFLOWS = "repo:workflow.yml,..."  daily (org: open-img-cloud)
+//   [vars] WEEKLY_WORKFLOWS    = "repo:workflow.yml,..."  Mondays, cron WEEKLY_CRON
 //   secret GH_DISPATCH_TOKEN   = fine-grained PAT, Actions: Read and write,
 //                                restricted to the repos listed above.
 
@@ -27,8 +28,15 @@ export function parseWorkflows(spec) {
     .filter((w) => w.repo && w.workflow);
 }
 
-export async function dispatchAll(env, fetchImpl = fetch) {
-  const workflows = parseWorkflows(env.SCHEDULED_WORKFLOWS);
+// Weekly cron: dispatches WEEKLY_WORKFLOWS instead of SCHEDULED_WORKFLOWS.
+export const WEEKLY_CRON = "0 4 * * 1";
+
+export function workflowsFor(cron, env) {
+  return cron === WEEKLY_CRON ? env.WEEKLY_WORKFLOWS : env.SCHEDULED_WORKFLOWS;
+}
+
+export async function dispatchAll(env, fetchImpl = fetch, spec = env.SCHEDULED_WORKFLOWS) {
+  const workflows = parseWorkflows(spec);
   if (!env.GH_DISPATCH_TOKEN) {
     console.error("scheduler: GH_DISPATCH_TOKEN secret is not set, nothing dispatched");
     return [];

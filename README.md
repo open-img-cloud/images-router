@@ -57,6 +57,9 @@ in 2026. This Worker also has a Cron Trigger (`[triggers] crons` in
 `SCHEDULED_WORKFLOWS` (`repo:workflow.yml,...`, org `open-img-cloud`):
 the 8 `watch.yml` upstream watchers and the `oic-website` daily deploy.
 
+A second, weekly cron (Mondays 04:00 UTC, `WEEKLY_WORKFLOWS`) dispatches the
+`.github` catalog audit, which re-validates every published image.
+
 The repos keep their own `schedule:` triggers as a fallback; duplicate runs
 are harmless. Code: `src/scheduler.js`. Results are logged per workflow
 (`scheduler: <repo>/<workflow> -> 204` on success) in Workers observability.
