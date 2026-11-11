@@ -23,7 +23,7 @@
 // open proxy to arbitrary buckets of the tenant. Add the bucket name there
 // when onboarding a new image repo.
 
-import { dispatchAll } from "./scheduler.js";
+import { dispatchAll, workflowsFor } from "./scheduler.js";
 
 const TEXT = { "content-type": "text/plain; charset=utf-8" };
 const NOT_FOUND = () => new Response("Not found", { status: 404, headers: TEXT });
@@ -47,7 +47,7 @@ const LATEST_TTL = 300;
 export default {
   // Daily Cron Trigger: dispatch the workflows listed in SCHEDULED_WORKFLOWS.
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(dispatchAll(env));
+    ctx.waitUntil(dispatchAll(env, fetch, workflowsFor(event.cron, env)));
   },
 
   async fetch(request, env) {
