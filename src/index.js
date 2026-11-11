@@ -22,8 +22,13 @@
 // Allowlist (env.ALLOWED_BUCKETS) prevents the Worker from being used as an
 // open proxy to arbitrary buckets of the tenant. Add the bucket name there
 // when onboarding a new image repo.
+//
+// Download statistics (src/stats.js): each counted qcow2 download writes a
+// data point to Workers Analytics Engine; GET /_stats.json serves the
+// aggregated counts per image, version and file.
 
 import { dispatchAll, workflowsFor } from "./scheduler.js";
+import { STATS_PATH, handleStats, recordDownload, rollup, shouldCount } from "./stats.js";
 
 const TEXT = { "content-type": "text/plain; charset=utf-8" };
 const NOT_FOUND = () => new Response("Not found", { status: 404, headers: TEXT });
@@ -48,14 +53,19 @@ export default {
   // Daily Cron Trigger: dispatch the workflows listed in SCHEDULED_WORKFLOWS.
   async scheduled(event, env, ctx) {
     ctx.waitUntil(dispatchAll(env, fetch, workflowsFor(event.cron, env)));
+    // Download statistics: fold finished days into KV (no-op without STATS_KV).
+    ctx.waitUntil(rollup(env).catch((err) => console.error(`stats: rollup failed: ${err}`)));
   },
 
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method !== "GET" && request.method !== "HEAD") {
       return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD", ...TEXT } });
     }
 
     const url = new URL(request.url);
+    if (url.pathname === STATS_PATH) {
+      return handleStats(request, env, ctx);
+    }
     // Preserve the trailing-slash signal BEFORE filtering empty segments:
     // `/foo/bar/`.split('/').filter(Boolean) drops it, and we'd never serve
     // index.html for directory requests.
@@ -138,6 +148,22 @@ export default {
       const v = origin.headers.get(h);
       if (v) headers.set(h, v);
     }
+    recordDownload(env, {
+      bucket: bucketName,
+      keyTail,
+      request,
+      status: origin.status,
+      bytes: origin.headers.get("content-length"),
+      kind: shouldCount({
+        method: request.method,
+        keyTail,
+        status: origin.status,
+        range: request.headers.get("range"),
+        userAgent: request.headers.get("user-agent"),
+        excludeUa: env.STATS_EXCLUDE_UA,
+      }),
+    });
+
     headers.set("cache-control", isMutable ? `public, max-age=${LATEST_TTL}` : `public, max-age=${IMMUTABLE_TTL}, immutable`);
 
     return new Response(request.method === "HEAD" ? null : origin.body, {
