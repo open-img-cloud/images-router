@@ -119,3 +119,7 @@ curl -I https://images.openimages.cloud/alpaquita-linux/latest/MANIFEST.json
 ```
 
 [conv]: https://github.com/open-img-cloud/.github/blob/main/CONVENTIONS.md
+
+## License
+
+[GPL-2.0](LICENSE), like the rest of the open-img-cloud tooling.
