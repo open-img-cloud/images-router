@@ -74,10 +74,69 @@ A fine-grained personal access token, resource owner `open-img-cloud`,
 restricted to the repos in `SCHEDULED_WORKFLOWS`, permission
 **Actions: Read and write** only.
 
+## Download statistics
+
+Every qcow2 download is counted in the Worker (edge cache hits never reach
+the S3 origin, so bucket logs would miss most of them). Code: `src/stats.js`.
+
+**What counts.** A `GET` of `<bucket>/<version|latest>/<file>.qcow2` answered
+`200`, or `206` for a `Range` starting at byte 0 (first chunk of a segmented or
+resumable download). Resumed transfers (`bytes=N-`, N > 0), parallel chunks,
+the `bytes=0-0` probe, `HEAD`, `304`, errors, obvious crawlers and our own CI
+(User-Agent containing a `STATS_EXCLUDE_UA` substring) are not counted. A
+count means "download started": an aborted transfer still counts once.
+
+**Storage.** One data point per download in the Workers Analytics Engine
+dataset `oic_downloads` (binding `DOWNLOADS`, created automatically on the
+first write): `blob1` bucket, `blob2` version segment (`latest` for the
+alias), `blob3` filename, `blob4` `full` or `range0`, `blob5` country,
+`blob6` client family (`curl`, `wget`...), `double1` status, `double2` bytes.
+Analytics Engine keeps 3 months of data.
+
+**Public endpoint.** `GET https://images.openimages.cloud/_stats.json`,
+cached at the edge for one hour, CORS open:
+
+```json
+{
+  "generated_at": "2026-11-11T12:00:00.000Z",
+  "since": "2026-08-13T00:00:00.000Z",
+  "window": "all-time",
+  "total": 1234,
+  "images": {
+    "alpine-linux": {
+      "total": 321,
+      "versions": { "3.24.1": 120, "latest": 201 },
+      "files": { "alpine-3.24.1-bios-x86_64.qcow2": 250, "alpine-3.24.1-uefi-x86_64.qcow2": 71 }
+    }
+  }
+}
+```
+
+`versions` follows the URL (`latest` kept apart); `files` is keyed by
+filename, which embeds the version, so it merges `/latest/` and
+`/<version>/` downloads of the same artifact. The endpoint queries the
+dataset through the Analytics SQL binding (`ANALYTICS_SQL`, no API token).
+
+**All-time totals (optional).** Without KV, `window` is `rolling-90d`. With
+the `STATS_KV` namespace bound, the daily cron folds every finished UTC day
+into KV (idempotent, catches up missed days) and the endpoint adds today's
+live counts: `window` becomes `all-time`, starting 90 days before the first
+rollup. Setup, once:
+
+```sh
+npx wrangler kv namespace create oic-download-stats
+# then uncomment the [[kv_namespaces]] block in wrangler.toml with the id
+```
+
+Ad hoc queries: Cloudflare dashboard, or the SQL API with a token holding
+*Account Analytics: Read*, e.g.
+`SELECT blob1, COUNT(*) FROM events.analyticsEngine.oic_downloads WHERE timestamp >= NOW() - INTERVAL '7' DAY GROUP BY blob1`.
+
 ## Local development
 
 ```sh
 npm install
+npm test
 npx wrangler dev
 # then: curl http://localhost:8787/alpaquita-linux/2026.04.14/foo.qcow2
 ```

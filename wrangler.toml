@@ -30,6 +30,29 @@ SCHEDULED_WORKFLOWS = "debian-12:watch.yml,debian-13:watch.yml,ubuntu-22.04:watc
 # catalog-wide re-validation of every published image.
 WEEKLY_WORKFLOWS = ".github:catalog-audit.yml"
 
+# Download statistics (src/stats.js). User-Agent substrings that are never
+# counted: our own CI (validate-image, smoke-openstack, catalog audit).
+STATS_EXCLUDE_UA = "openimages-,oic-ci"
+STATS_DATASET = "oic_downloads"
+
+# Download statistics: one data point per counted qcow2 download. The dataset
+# is created automatically on the first write (3 months of retention).
+[[analytics_engine_datasets]]
+binding = "DOWNLOADS"
+dataset = "oic_downloads"
+
+# Analytics SQL binding: lets /_stats.json query the dataset without an API
+# token (Wrangler >= 4.145).
+[analytics]
+binding = "ANALYTICS_SQL"
+
+# Optional: all-time totals. Without it, /_stats.json covers the last 90 days.
+# Create once with `npx wrangler kv namespace create oic-download-stats`,
+# then uncomment and paste the id. The daily cron rolls finished days into it.
+# [[kv_namespaces]]
+# binding = "STATS_KV"
+# id = "<oic-download-stats namespace id>"
+
 [triggers]
 crons = ["40 5 * * *", "0 4 * * 1"]  # daily watchers 05:40 UTC; weekly audit Monday 04:00 UTC
 
