@@ -12,7 +12,7 @@ routes = [
 [vars]
 # Allowlist of bucket names the Worker is willing to route to. Add the
 # bucket name here for every new image repo onboarded under open-img-cloud/.
-ALLOWED_BUCKETS = "alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,nixos,oracle-linux-8,oracle-linux-9,oracle-linux-10,windows-server-2022,octavia-amphora,cloud-rescue"
+ALLOWED_BUCKETS = "almalinux-9,rocky-linux-9,alpaquita-linux,alpine-linux,amazon-linux-2,amazon-linux-2023,gentoo-linux,nixos,oracle-linux-8,oracle-linux-9,oracle-linux-10,windows-server-2022,octavia-amphora,cloud-rescue"
 
 # Origin: Infomaniak Object Storage (Ceph S3), Public Cloud project
 # "Images_Storage" (PCP-LKEN9H4). Public buckets are read anonymously via
@@ -24,7 +24,7 @@ S3_TENANT = "c0862b7f7b6849508bbcd74fb00e7fe2"
 # Daily external scheduler (src/scheduler.js): dispatches these workflows
 # via workflow_dispatch, which GitHub never disables for inactivity.
 # Requires the GH_DISPATCH_TOKEN secret (wrangler secret put GH_DISPATCH_TOKEN).
-SCHEDULED_WORKFLOWS = "alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-8:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml"
+SCHEDULED_WORKFLOWS = "almalinux-9:watch.yml,rocky-linux-9:watch.yml,alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-8:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml"
 
 [triggers]
 crons = ["40 5 * * *"]  # daily 05:40 UTC, before the repos' own 06:17-06:59 fallbacks
