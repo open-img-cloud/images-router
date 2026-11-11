@@ -12,5 +12,6 @@
   },
   "devDependencies": {
     "wrangler": "^4.34.0"
-  }
+  },
+  "license": "GPL-2.0-only"
 }
