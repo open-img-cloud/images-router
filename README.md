@@ -74,6 +74,26 @@ A fine-grained personal access token, resource owner `open-img-cloud`,
 restricted to the repos in `SCHEDULED_WORKFLOWS`, permission
 **Actions: Read and write** only.
 
+## Catalog rebuild hook (`POST /_hooks/catalog`)
+
+`index.json` and `osism/images.yml` come from the oic-website build. A release
+moves `latest/` and the digests at once, so the reusable build workflows call
+this hook at the end of a release, and the Worker dispatches
+`oic-website:deploy.yml` with `GH_DISPATCH_TOKEN`. Clients that check
+signatures against `index.json` (oic-sync) then see the new digests within
+minutes instead of at the next daily build.
+
+Authentication is a GitHub Actions OIDC token, no shared secret: audience
+`https://images.openimages.cloud/_hooks/catalog`, organisation
+`open-img-cloud`, workflow running from `main` (`job_workflow_ref`). The
+signature is checked against GitHub's JWKS.
+
+```sh
+tok=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+  "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://images.openimages.cloud/_hooks/catalog" | jq -r .value)
+curl -fsS -X POST -H "Authorization: Bearer $tok" https://images.openimages.cloud/_hooks/catalog
+```
+
 ## Download statistics
 
 Every qcow2 download is counted in the Worker (edge cache hits never reach

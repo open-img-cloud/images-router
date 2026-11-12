@@ -29,6 +29,7 @@
 // aggregated counts per image, version and file.
 
 import { dispatchAll, workflowsFor } from "./scheduler.js";
+import { HOOK_PATH, handleCatalogHook } from "./hooks.js";
 import { STATS_PATH, handleStats, recordDownload, rollup, shouldCount } from "./stats.js";
 
 const TEXT = { "content-type": "text/plain; charset=utf-8" };
@@ -92,6 +93,9 @@ export default {
   },
 
   async fetch(request, env, ctx) {
+    if (new URL(request.url).pathname === HOOK_PATH) {
+      return handleCatalogHook(request, env, ctx);
+    }
     if (request.method !== "GET" && request.method !== "HEAD") {
       return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD", ...TEXT } });
     }
