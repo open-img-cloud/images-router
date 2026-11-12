@@ -1,4 +1,24 @@
-# images-router
+<p align="center">
+  <a href="https://openimages.cloud">
+    <img src="https://openimages.cloud/img/og.png" alt="openimages.cloud: signed, boot-tested cloud images for OpenStack and Proxmox" width="720">
+  </a>
+</p>
+
+<h1 align="center">images-router</h1>
+
+<p align="center">
+  <a href="https://github.com/open-img-cloud/images-router/actions/workflows/test.yml"><img alt="Test" src="https://github.com/open-img-cloud/images-router/actions/workflows/test.yml/badge.svg"></a>
+  <a href="https://github.com/open-img-cloud/images-router/actions/workflows/deploy.yml"><img alt="Deploy Worker" src="https://github.com/open-img-cloud/images-router/actions/workflows/deploy.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-555"></a>
+</p>
+
+<p align="center">
+  <a href="https://openimages.cloud"><b>Website</b></a> ·
+  <a href="https://images.openimages.cloud/index.json">Registry index</a> ·
+  <a href="https://images.openimages.cloud/_stats.json">Download stats</a> ·
+  <a href="https://github.com/open-img-cloud/docs/blob/main/docs/architecture.md">Architecture</a> ·
+  <a href="https://github.com/open-img-cloud/images-router/issues">Report an issue</a>
+</p>
 
 Cloudflare Worker that routes `https://images.openimages.cloud/<os>/...` to
 per-distribution public buckets on **Infomaniak Object Storage** (Ceph S3,
@@ -55,7 +75,8 @@ in 2026. This Worker also has a Cron Trigger (`[triggers] crons` in
 `wrangler.toml`, daily 05:40 UTC) that dispatches, via `workflow_dispatch`
 (never disabled for inactivity), every workflow listed in
 `SCHEDULED_WORKFLOWS` (`repo:workflow.yml,...`, org `open-img-cloud`):
-the 8 `watch.yml` upstream watchers and the `oic-website` daily deploy.
+the `watch.yml` upstream watcher of every image repository and the
+`oic-website` daily deploy.
 
 A second, weekly cron (Mondays 04:00 UTC, `WEEKLY_WORKFLOWS`) dispatches the
 `.github` catalog audit, which re-validates every published image.
@@ -178,7 +199,7 @@ For the `deploy.yml` workflow to run:
 
 | Secret | Where to get it | Permissions |
 |---|---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → *Create Token* → custom | `Account → Workers Scripts → Edit` + `Account → Account Settings → Read` (for the account ID lookup) + `Zone → Workers Routes → Edit` on the openimages.cloud zone. Optionally `Account → Workers R2 Storage → Read` if you want the Worker to enumerate buckets in dev. |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → *Create Token* → custom | `Account → Workers Scripts → Edit` + `Account → Account Settings → Read` (for the account ID lookup) + `Zone → Workers Routes → Edit` on the openimages.cloud zone. |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Dashboard → right-side panel → "Account ID" | n/a (just the value) |
 
 These are **repo-level secrets** (Settings → Secrets and variables →
@@ -190,7 +211,7 @@ deploy power.
 After deploy, smoke test the route:
 
 ```sh
-curl -I https://images.openimages.cloud/alpaquita-linux/2026.04.14/alpaquita-2026.04.14-glibc-x86_64.qcow2
+curl -I https://images.openimages.cloud/alpaquita-linux/2026.11.11/alpaquita-2026.11.11-glibc-x86_64.qcow2
 # expected: 200 + Cache-Control: public, max-age=31536000, immutable
 
 curl -I https://images.openimages.cloud/nonexistent-os/foo
