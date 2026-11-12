@@ -24,7 +24,7 @@ S3_TENANT = "c0862b7f7b6849508bbcd74fb00e7fe2"
 # Daily external scheduler (src/scheduler.js): dispatches these workflows
 # via workflow_dispatch, which GitHub never disables for inactivity.
 # Requires the GH_DISPATCH_TOKEN secret (wrangler secret put GH_DISPATCH_TOKEN).
-SCHEDULED_WORKFLOWS = "freebsd-14:watch.yml,freebsd-15:watch.yml,centos-stream-10:watch.yml,fedora-44:watch.yml,fedora-45:watch.yml,opensuse-leap-16:watch.yml,debian-12:watch.yml,debian-13:watch.yml,ubuntu-22.04:watch.yml,ubuntu-24.04:watch.yml,ubuntu-26.04:watch.yml,almalinux-8:watch.yml,almalinux-10:watch.yml,rocky-linux-8:watch.yml,rocky-linux-10:watch.yml,almalinux-9:watch.yml,rocky-linux-9:watch.yml,alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-8:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml"
+SCHEDULED_WORKFLOWS = "freebsd:watch.yml,centos-stream-10:watch.yml,fedora-44:watch.yml,fedora-45:watch.yml,opensuse-leap-16:watch.yml,debian-12:watch.yml,debian-13:watch.yml,ubuntu-22.04:watch.yml,ubuntu-24.04:watch.yml,ubuntu-26.04:watch.yml,almalinux-8:watch.yml,almalinux-10:watch.yml,rocky-linux-8:watch.yml,rocky-linux-10:watch.yml,almalinux-9:watch.yml,rocky-linux-9:watch.yml,alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-8:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml"
 
 # Weekly (Mondays 04:00 UTC, cron must match WEEKLY_CRON in src/scheduler.js):
 # catalog-wide re-validation of every published image.
