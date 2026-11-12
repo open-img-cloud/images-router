@@ -181,6 +181,14 @@ export default {
     // Without ListBucket rights, S3 answers 403 for a missing key on a
     // public bucket. Surface both as a plain 404.
     if (origin.status === 403 || origin.status === 404) {
+      // The bucket root has no index.html (each version directory and latest/
+      // have one): send /<slug>/ to the latest release instead of a 404.
+      if (isDirRequest && keyTail === "") {
+        return new Response(null, {
+          status: 302,
+          headers: { location: `/${bucketName}/latest/`, "cache-control": `public, max-age=${LATEST_TTL}` },
+        });
+      }
       return NOT_FOUND();
     }
     if (origin.status >= 500) {

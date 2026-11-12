@@ -65,3 +65,20 @@ test("catalog relay answers 304 on a matching ETag and 404 when the site has no 
   );
   assert.equal(missing.status, 404);
 });
+
+test("the bucket root redirects to latest/ when it has no index.html", async () => {
+  const { res } = await withFetch(
+    () => new Response("", { status: 403 }),
+    () => worker.fetch(new Request("https://images.openimages.cloud/debian-13/"), env, {}),
+  );
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get("location"), "/debian-13/latest/");
+});
+
+test("a missing file below the root stays a 404", async () => {
+  const { res } = await withFetch(
+    () => new Response("", { status: 404 }),
+    () => worker.fetch(new Request("https://images.openimages.cloud/debian-13/1.0/nope.qcow2"), env, {}),
+  );
+  assert.equal(res.status, 404);
+});
