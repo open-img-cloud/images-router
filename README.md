@@ -40,6 +40,10 @@ GET https://s3.gva2.infomaniak.cloud/<tenant>:alpine-linux/3.23.4/foo.qcow2
 - First path segment selects the bucket (must be in `ALLOWED_BUCKETS`).
 - The rest of the path is the object key.
 - Trailing-slash or empty key serves `<key>/index.html`.
+- `latest/<file>` is served from `<version>/<file>`, where `<version>` comes from
+  `latest.json` at the bucket root (`{"version": "<version>"}`, written by the publish
+  action and read uncached on each request). The storage keeps one copy of each release.
+  A bucket without a valid pointer is served from its physical `latest/` directory.
 - `latest/…` and the bucket-root index are served with
   `Cache-Control: public, max-age=300`. Versioned paths get
   `public, max-age=31536000, immutable`.
