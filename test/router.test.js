@@ -82,3 +82,59 @@ test("a missing file below the root stays a 404", async () => {
   );
   assert.equal(res.status, 404);
 });
+
+test("latest/ is served from the version named by latest.json", async () => {
+  const { res, calls } = await withFetch(
+    (req) => {
+      const url = typeof req === "string" ? req : req.url;
+      if (url.endsWith("/latest.json")) return Response.json({ version: "13-2" });
+      return new Response("qcow2", { status: 200, headers: { "content-length": "5" } });
+    },
+    () => worker.fetch(new Request("https://images.openimages.cloud/debian-13/latest/debian-13-2.qcow2"), env, {}),
+  );
+  assert.deepEqual(calls, ["https://s3.example/t:debian-13/latest.json", "https://s3.example/t:debian-13/13-2/debian-13-2.qcow2"]);
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), "qcow2");
+  // The alias keeps its short client cache lifetime.
+  assert.equal(res.headers.get("cache-control"), "public, max-age=300");
+});
+
+test("latest/ directory listing is the index.html of the current version", async () => {
+  const { calls } = await withFetch(
+    (req) => {
+      const url = typeof req === "string" ? req : req.url;
+      if (url.endsWith("/latest.json")) return Response.json({ version: "13-2" });
+      return new Response("<html>", { status: 200 });
+    },
+    () => worker.fetch(new Request("https://images.openimages.cloud/debian-13/latest/"), env, {}),
+  );
+  assert.equal(calls[1], "https://s3.example/t:debian-13/13-2/index.html");
+});
+
+test("without a valid pointer, latest/ falls back to the physical directory", async () => {
+  for (const pointer of [
+    () => new Response("", { status: 404 }),
+    () => new Response("not json", { status: 200 }),
+    () => Response.json({ version: "../etc" }),
+    () => Response.json({ version: "a/b" }),
+    () => Response.json({}),
+  ]) {
+    const { res, calls } = await withFetch(
+      (req) => {
+        const url = typeof req === "string" ? req : req.url;
+        return url.endsWith("/latest.json") ? pointer() : new Response("x", { status: 200 });
+      },
+      () => worker.fetch(new Request("https://images.openimages.cloud/debian-13/latest/MANIFEST.json"), env, {}),
+    );
+    assert.equal(res.status, 200);
+    assert.equal(calls[1], "https://s3.example/t:debian-13/latest/MANIFEST.json");
+  }
+});
+
+test("versioned paths never read the pointer", async () => {
+  const { calls } = await withFetch(
+    () => new Response("x", { status: 200 }),
+    () => worker.fetch(new Request("https://images.openimages.cloud/debian-13/13-1/MANIFEST.json"), env, {}),
+  );
+  assert.deepEqual(calls, ["https://s3.example/t:debian-13/13-1/MANIFEST.json"]);
+});
