@@ -138,3 +138,13 @@ test("versioned paths never read the pointer", async () => {
   );
   assert.deepEqual(calls, ["https://s3.example/t:debian-13/13-1/MANIFEST.json"]);
 });
+
+test("robots.txt disallows everything without touching the origin", async () => {
+  const { res, calls } = await withFetch(
+    () => new Response("unexpected", { status: 500 }),
+    () => worker.fetch(new Request("https://images.openimages.cloud/robots.txt"), env, {}),
+  );
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), "User-agent: *\nDisallow: /\n");
+  assert.equal(calls.length, 0);
+});
