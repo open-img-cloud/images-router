@@ -17,6 +17,11 @@
 //     as are 304 revalidations and the "bytes=0-0" size probe;
 //   - not from an obvious crawler, nor from our own CI (STATS_EXCLUDE_UA).
 // A count means "download started": an aborted transfer is still counted.
+//
+// Read side, sweeps: crawlers that present a browser user agent download
+// every image of the catalog within an hour (observed November 2026: 58% of
+// all counts). Downloads from one (hour, country, client family) above
+// STATS_SWEEP_THRESHOLD (default 10) are left out of the public totals.
 
 export const STATS_PATH = "/_stats.json";
 export const STATS_TTL = 3600;
@@ -25,6 +30,7 @@ const DAY_MS = 86400 * 1000;
 const ROLLUP_KEY = "rollup-v1";
 const DEFAULT_DATASET = "oic_downloads";
 const DEFAULT_EXCLUDE_UA = "openimages-,oic-ci";
+const DEFAULT_SWEEP_THRESHOLD = 10;
 const BOT_UA = /bot\b|crawl|spider|slurp|facebookexternalhit|headless/i;
 
 /** "bytes=A-B[,...]" -> { start, end } of the first range, or null. */
@@ -95,20 +101,47 @@ function datasetName(env) {
   return name;
 }
 
-/** Downloads per (bucket, version, filename) in [from, to). */
+/**
+ * Drops sweeps from rows grouped by source: { source, bucket, version,
+ * filename, n }, where source is "<hour>|<country>|<client family>". A source
+ * with more than `threshold` downloads in total is a sweep. Returns
+ * [bucket, version, filename, n] rows of what is kept.
+ */
+export function dropSweeps(rows, threshold = DEFAULT_SWEEP_THRESHOLD) {
+  const perSource = new Map();
+  for (const r of rows) perSource.set(r.source, (perSource.get(r.source) || 0) + r.n);
+  return mergeRows(
+    rows.filter((r) => perSource.get(r.source) <= threshold).map((r) => [r.bucket, r.version, r.filename, r.n]),
+  );
+}
+
+function sweepThreshold(env) {
+  const t = Number(env.STATS_SWEEP_THRESHOLD);
+  return Number.isInteger(t) && t > 0 ? t : DEFAULT_SWEEP_THRESHOLD;
+}
+
+/** Downloads per (bucket, version, filename) in [from, to), sweeps left out. */
 export async function queryRows(env, from, to) {
   const query = `
-    SELECT blob1 AS bucket, blob2 AS version, blob3 AS filename, COUNT(*) AS downloads
+    SELECT toStartOfHour(timestamp) AS hour, blob5 AS country, blob6 AS client,
+           blob1 AS bucket, blob2 AS version, blob3 AS filename, COUNT(*) AS downloads
     FROM events.analyticsEngine.${datasetName(env)}
     WHERE timestamp >= $from AND timestamp < $to
-    GROUP BY blob1, blob2, blob3`;
+    GROUP BY hour, blob5, blob6, blob1, blob2, blob3`;
   const result = await env.ANALYTICS_SQL.query({
     query,
     params: { from: from.toISOString(), to: to.toISOString() },
   });
-  return (result?.data ?? [])
-    .map((r) => [String(r.bucket), String(r.version), String(r.filename), Math.round(Number(r.downloads) || 0)])
-    .filter((r) => r[0] && r[3] > 0);
+  const rows = (result?.data ?? [])
+    .map((r) => ({
+      source: `${r.hour}|${r.country}|${r.client}`,
+      bucket: String(r.bucket),
+      version: String(r.version),
+      filename: String(r.filename),
+      n: Math.round(Number(r.downloads) || 0),
+    }))
+    .filter((r) => r.bucket && r.n > 0);
+  return dropSweeps(rows, sweepThreshold(env)).filter((r) => r[3] > 0);
 }
 
 /** Adds row counts keyed by (bucket, version, filename). */
