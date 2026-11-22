@@ -32,7 +32,7 @@ WEEKLY_WORKFLOWS = ".github:catalog-audit.yml"
 
 # Download statistics (src/stats.js). User-Agent substrings that are never
 # counted: our own CI (validate-image, smoke-openstack, catalog audit).
-STATS_EXCLUDE_UA = "openimages-,oic-ci"
+STATS_EXCLUDE_UA = "openimages-,oic-ci,oic-check"
 STATS_DATASET = "oic_downloads"
 
 # Download statistics: one data point per counted qcow2 download. The dataset

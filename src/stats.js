@@ -29,7 +29,7 @@ const RETENTION_DAYS = 90;
 const DAY_MS = 86400 * 1000;
 const ROLLUP_KEY = "rollup-v1";
 const DEFAULT_DATASET = "oic_downloads";
-const DEFAULT_EXCLUDE_UA = "openimages-,oic-ci";
+const DEFAULT_EXCLUDE_UA = "openimages-,oic-ci,oic-check";
 const DEFAULT_SWEEP_THRESHOLD = 10;
 const BOT_UA = /bot\b|crawl|spider|slurp|facebookexternalhit|headless/i;
 
