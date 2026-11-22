@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
-import { buildStats, computeStats, firstRange, mergeRows, rollup, shouldCount } from "../src/stats.js";
+import { buildStats, computeStats, dropSweeps, firstRange, mergeRows, rollup, shouldCount } from "../src/stats.js";
 
 const base = { method: "GET", keyTail: "3.24.1/alpine-3.24.1-bios-x86_64.qcow2", status: 200, userAgent: "curl/8.5.0" };
 
@@ -190,4 +190,14 @@ test("/_stats.json serves JSON with CORS, 503 when not configured", async () => 
   const broken = { query: async () => { throw new Error("boom"); } };
   const err = await worker.fetch(new Request("https://images.openimages.cloud/_stats.json"), { ANALYTICS_SQL: broken }, {});
   assert.equal(err.status, 503);
+});
+
+test("dropSweeps leaves out a source downloading the whole catalog within an hour", () => {
+  const row = (source, bucket, n = 1) => ({ source, bucket, version: "1", filename: `${bucket}.qcow2`, n });
+  const sweep = Array.from({ length: 12 }, (_, i) => row("2026-11-21 02:00:00|NL|mozilla", `img${i}`));
+  const users = [row("2026-11-21 02:00:00|FR|mozilla", "img0", 2), row("2026-11-21 03:00:00|NL|mozilla", "img1")];
+  const kept = dropSweeps([...sweep, ...users], 10);
+  assert.deepEqual(kept.sort(), [["img0", "1", "img0.qcow2", 2], ["img1", "1", "img1.qcow2", 1]].sort());
+  // at the threshold itself, the source is kept
+  assert.equal(dropSweeps(sweep.slice(0, 10), 10).length, 10);
 });
