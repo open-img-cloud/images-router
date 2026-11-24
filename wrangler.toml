@@ -27,8 +27,9 @@ S3_TENANT = "c0862b7f7b6849508bbcd74fb00e7fe2"
 SCHEDULED_WORKFLOWS = "freebsd-15:watch.yml,freebsd-14:watch.yml,opnsense:watch.yml,flatcar:watch.yml,talos-linux:watch.yml,centos-stream-10:watch.yml,centos-stream-9:watch.yml,arch-linux:watch.yml,fedora-44:watch.yml,fedora-45:watch.yml,opensuse-leap-16:watch.yml,debian-12:watch.yml,debian-13:watch.yml,ubuntu-22.04:watch.yml,ubuntu-24.04:watch.yml,ubuntu-26.04:watch.yml,almalinux-8:watch.yml,almalinux-10:watch.yml,rocky-linux-8:watch.yml,rocky-linux-10:watch.yml,almalinux-9:watch.yml,rocky-linux-9:watch.yml,alpaquita-linux:watch.yml,alpine-linux:watch.yml,amazon-linux-2:watch.yml,amazon-linux-2023:watch.yml,oracle-linux-8:watch.yml,oracle-linux-9:watch.yml,oracle-linux-10:watch.yml,gentoo-linux:watch.yml,nixos:watch.yml,oic-website:deploy.yml,manila-service-image:watch.yml,trove-guest-image:watch.yml,cirros:watch.yml,cloud-rescue:watch.yml"
 
 # Weekly (Mondays 04:00 UTC, cron must match WEEKLY_CRON in src/scheduler.js):
-# catalog-wide re-validation of every published image.
-WEEKLY_WORKFLOWS = ".github:catalog-audit.yml"
+# catalog-wide re-validation of every published image, the docs link check and
+# the upstream lifecycle snapshot of the site (keeps their schedules alive).
+WEEKLY_WORKFLOWS = ".github:catalog-audit.yml,docs:links.yml,oic-website:upstream-snapshot.yml"
 
 # Download statistics (src/stats.js). User-Agent substrings that are never
 # counted: our own CI (validate-image, smoke-openstack, catalog audit).
